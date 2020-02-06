@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+	body, html,#allmap {width: 100%;height: 90%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+			   #r-result {width:80%;margin-top:5px;font-family:"微软雅黑";}
+	</style>
+	<script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=R2oH4Pa4uQlXtdFNasbYGlXLtvd0N3Ob"></script>
+	<title>地图展示</title>
+</head>
+<body>
+	<div id="allmap"></div>
+	
+	<div id="r-result" align="center">
+		<input type="text" id="cityName"/>
+		<input type="button" onclick="inputCityName();" value="切换至选择的城市"/>
+		
+		<input type="button" onclick="addMarker();" value="添加疫情标记"/>
+		<input type="button" onclick="removeMarker();" value="删除疫情标记"/>
+		
+		<input type="button"  onclick="addControl();" value="开启辅助控件"/>
+		<input type="button"  onclick="removeControl();" value="关闭辅助控件"/>
+	</div>	
+</body>
+</html>
+<script type="text/javascript">
+	// 百度地图API功能
+	var map = new BMap.Map("allmap");    // 创建Map实例
+	map.centerAndZoom(new BMap.Point(114.037366,22.619259), 11);  // 初始化地图,设置中心点坐标和地图级别
+	//添加地图类型控件
+	map.addControl(new BMap.MapTypeControl({
+		mapTypes:[
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP
+        ]}));	  
+	map.setCurrentCity("深圳");          // 设置地图显示的城市 此项是必须设置的
+	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+	
+	//定义控件及其放置的位置
+	var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT});// 左上角，添加比例尺
+	var top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
+	var top_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}); //右上角，仅包含平移和缩放按钮
+	
+	//创建覆盖物
+	var point = new BMap.Point(114.037366,22.619259);
+	var marker = new BMap.Marker(point);  // 创建标注
+	
+	function inputCityName(){
+		//获取城市的名称
+		var cityName = document.getElementById("cityName").value;
+		
+		//显示对应的城市
+		map.centerAndZoom(cityName,15)
+	}
+	
+	function addControl(){
+		//添加控件：控件和比例尺
+		map.addControl(top_left_control);        
+		map.addControl(top_left_navigation);     
+		map.addControl(top_right_navigation);    
+	}
+	
+	function removeControl(){
+		map.removeControl(top_left_control);     
+		map.removeControl(top_left_navigation);  
+		map.removeControl(top_right_navigation); 
+	}
+	
+	function addMarker(){
+		//添加覆盖物
+		map.addOverlay(marker);               // 将标注添加到地图中
+		marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+		
+		var opts = {
+			  width : 200,     // 信息窗口宽度
+			  height: 100,     // 信息窗口高度
+			  title : "举个例子：深圳XXX地点" , // 信息窗口标题
+			  enableMessage:true,//设置允许信息窗发送短息
+			  message:"戳下面的链接看下地址"
+			}
+		var infoWindow = new BMap.InfoWindow("地址：深圳市XXXX区XXX地址有疑似病例1个", opts);  // 创建信息窗口对象 
+		marker.addEventListener("click", function(){          
+				map.openInfoWindow(infoWindow,point); //开启信息窗口
+			});
+	}
+	
+	function removeMarker(){
+		//删除覆盖物
+		map.removeOverlay(marker);
+	}
+	
+</script>
